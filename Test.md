@@ -15,3 +15,12 @@ The same goes to network security. "We have servers with a graphical user interf
 This brings us to our topic for this chapter: PowerShell and network technology. With only a small set of Cmdlets in hand and some scripting know how we are able to do wonderful things at zero cost.
 Let’s dive in.
 
+# IP Configuration
+
+With the introduction of the headless Nano Server and Server Core, PowerShell is becoming increasingly important. Previously, we did the IP configuration graphically or with the good old netsh command. Today PowerShell is here and allows us to configure IP address, subnet mask, default gateway and the DNS server settings more easily than ever before.
+
+To configure an IPv4 Address you may want to check the Network Adapter Name or the Interface Index first.
+```
+PS C:\> Get-NetAdapter | Where-Object Status -EQ 'Up' | Format-Table -AutoSize
+```
+
