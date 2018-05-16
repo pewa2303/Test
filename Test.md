@@ -215,7 +215,24 @@ else {
         Write-Host "Failed to connect to $cname" -ForegroundColor Red
         throw 'Error'
      }
-```
+     
+Enter Computername: AzServer01
+Enter message: Server shutdown in about 10 minutes.
 
+User    Computer   Session   Date      Time   
+----    --------   -------   ----      ----   
+patrick AzServer01 rdp-tcp#2 5/16/2018 7:26 PM
+
+Sending message to session Console, display time 60
+Async message sent to session Console
+Sending message to session RDP-Tcp#2, display time 60
+Async message sent to session RDP-Tcp#2
+
+PS C:\> 
+     
+```
+IMAGE ??????
+
+What have we done so far? We checked if the computer responds to ICMP requests. If so, we use quser to query the logged on users. If not, the script throws an error. As mentioned, we retrieve the computer names from the Active Directory database. Sometimes, however, there is a need to get more information than the computer name. Then we may need a complete network configuration overview of all Windows Servers. Let’s do it.
 
 
