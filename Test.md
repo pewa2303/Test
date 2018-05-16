@@ -181,7 +181,8 @@ arp -d
 $ping=Test-Connection -ComputerName $IPAddress -Count 1 -Quiet
 $arp=[boolean](arp -a | Select-String "$IPAddress")
 If (!$ping -and $arp)
-{$line; Write-Host "ICMP: failure" -ForegroundColor Red`n; Write-Host "ARP : successful" -ForegroundColor Green`n; $line; Write-Host "Possible Cause on ${IPAddress}: Windows Firewall is blocking traffic"; Write-Host ""}
+{$line; Write-Host "ICMP: failure" -ForegroundColor Red`n; Write-Host "ARP : successful" `
+-ForegroundColor Green`n; $line; Write-Host "Possible Cause on ${IPAddress}: Windows Firewall is blocking traffic"; Write-Host ""}
 ```
 
 
