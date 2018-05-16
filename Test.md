@@ -76,8 +76,22 @@ PS C:\> Invoke-Command -ComputerName AzServer01 -ScriptBlock {Get-NetRoute -Dest
 0/0 | Select-Object -ExpandProperty NextHop}
 10.0.0.1
 ```
+Now we go one better! We can test if a remote computer Server02 has connectivity to its Default Gateway without knowing the IP Address of that Gateway.
+```
+PS C:\> Test-Connection -Source Server02 -ComputerName (Invoke-Command -Computer
+Name Server02 -ScriptBlock {Get-NetRoute -DestinationPrefix '0.0.0.0/0' | Select
+-Object -ExpandProperty NextHop})
 
+Source        Destination     IPV4Address      IPV6Address
+------        -----------     -----------      -----------
+SERVER02      192.168.0.1
+SERVER02      192.168.0.1
+SERVER02      192.168.0.1
+SERVER02      192.168.0.1
 
+PS C:\>
+```
+This overview of what I think are the most important network cmdlets is a foretaste of what else we have in mind in this chapter.
 
 
 
