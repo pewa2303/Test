@@ -168,5 +168,21 @@ AzDC01 AzDC02      10.0.0.8                                32    0
 
 PS C:\>
 ```
+We owe all this and more to the object-orientated Powershell. I like it! As shown, with PowerShell it’s easy to do some network checks in an Active Directory Domain. That’s because all computer accounts are stored in the Active Directory database. But are they really up? Grabbing those computer accounts don’t mean that they are switched on and users are logged on to them.
+
+## Is this host up and who is logged in?
+
+Is ping a reliable way to check if a host is up? Opinions differ. 
+
+The decisive factor for testing IP connectivity in Windows networks is the host based Windows Firewall. If both computers are on the same subnet, the ping may fail, but the host may be up. That’s because Windows Firewall may block ICMP requests. So far so good. But how can we determine if a host is up or not? I have a tailored solution for this problem, we simply check the ARP cache. If the ping fails, but the ARP request was successful, then it is pretty sure that the host is up! Note, that this applies only to computers that are in the same subnet. With a  small function in PowerShell, we see that AzServer is up, but the ping failed.
+```
+$IPAddress=Read-Host "Enter IP Address"
+arp -d
+$ping=Test-Connection -ComputerName $IPAddress -Count 1 -Quiet
+$arp=[boolean](arp -a | Select-String "$IPAddress")
+If (!$ping -and $arp)
+{$line; Write-Host "ICMP: failure" -ForegroundColor Red`n; Write-Host "ARP : successful" -ForegroundColor Green`n; $line; Write-Host "Possible Cause on ${IPAddress}: Windows Firewall is blocking traffic"; Write-Host ""}
+```
+
 
 
