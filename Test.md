@@ -199,9 +199,7 @@ $result=@()
 If ($test) {
        $message=Read-Host 'Enter message'
        Invoke-Command -ComputerName $cname -ScriptBlock {quser} | Select-Object -Skip 1 | Foreach-Object {
-
        $b=$_.trim() -replace '\s+',' ' -replace '>','' -split '\s'
-
        $result+= New-Object -TypeName PSObject -Property ([ordered]@{
                 'User' = $b[0]
                 'Computer' = $cname
@@ -211,13 +209,9 @@ If ($test) {
                 })      
                 } 
         $result | Format-Table
-        
         Invoke-Command -ComputerName $cname -ScriptBlock {msg * /V $using:message} -ErrorAction SilentlyContinue
-        
            }
-
 else {
-
         Write-Host "Failed to connect to $cname" -ForegroundColor Red
         throw 'Error'
      }
