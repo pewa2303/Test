@@ -52,7 +52,7 @@ PS C:\>
 ```
 For the final test of the connectivity I like to use Test-NetConnection. Test-NetConnection without specifying a destination address attempts to reach a standard address on the Internet.
 {line-numbers=off}
-`` 
+```
 PS C:\> Test-NetConnection
 
 ComputerName           : internetbeacon.msedge.net
