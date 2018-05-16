@@ -190,6 +190,38 @@ ICMP: failure, ARP: successful. Possible Cause on 10.0.0.4: Windows Firewall is 
 
 PS C:\> 
 ```
+This means, we could use Test-Connection to check multiple computers if they’re up before doing any further actions on them. 
+With that on mind, I wrote a nice little script which first tests with Test-Connection if the remote computer is up, then shows the logged on users (disconnected users are not displayed) and then sends a message to these users session over the network.
+```
+$cname=Read-Host "Enter Computername"
+$test=Test-Connection $cname -Count 1 -ErrorAction SilentlyContinue
+$result=@()
+If ($test) {
+       $message=Read-Host 'Enter message'
+       Invoke-Command -ComputerName $cname -ScriptBlock {quser} | Select-Object -Skip 1 | Foreach-Object {
+
+       $b=$_.trim() -replace '\s+',' ' -replace '>','' -split '\s'
+
+       $result+= New-Object -TypeName PSObject -Property ([ordered]@{
+                'User' = $b[0]
+                'Computer' = $cname
+                'Session' = $b[1]
+                'Date' = $b[5]
+                'Time' = $b[6..7] -join ' '
+                })      
+                } 
+        $result | Format-Table
+        
+        Invoke-Command -ComputerName $cname -ScriptBlock {msg * /V $using:message} -ErrorAction SilentlyContinue
+        
+           }
+
+else {
+
+        Write-Host "Failed to connect to $cname" -ForegroundColor Red
+        throw 'Error'
+     }
+```
 
 
 
