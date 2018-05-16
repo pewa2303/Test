@@ -36,7 +36,6 @@ To check the settings run Get-NetIPConfiguration.
 ```
 PS C:\> Get-NetIPConfiguration
 
-
 InterfaceAlias       : Ethernet 2
 InterfaceIndex       : 4
 InterfaceDescription : Microsoft Hyper-V Network Adapter #2
@@ -51,6 +50,19 @@ DNSServer            : ::1
 
 PS C:\>
 ```
+For the final test of the connectivity I like to use Test-NetConnection. Test-NetConnection without specifying a destination address attempts to reach a standard address on the Internet.
+{line-numbers=off}
+`` 
+PS C:\> Test-NetConnection
+
+ComputerName           : internetbeacon.msedge.net
+RemoteAddress          : 13.107.4.52
+InterfaceAlias         : Ethernet 2
+SourceAddress          : 10.0.0.7
+PingSucceeded          : True
+PingReplyDetails (RTT) : 4 ms
+
+PS C:\>
 
 
 
