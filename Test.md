@@ -64,5 +64,21 @@ PingReplyDetails (RTT) : 4 ms
 
 PS C:\>
 ```
+A computer makes its decisions about how to handle a packet based on its routing table. Either the computer manages the package by itself or it uses it's configured default gateway if it detects that the destination host is outside its own subnet. The default gateways IP Address is always associated with Prefix 0.0.0.0/0.
+```
+PS C:\> Get-NetRoute -DestinationPrefix 0.0.0.0/0 | Select-Object -ExpandProperty NextHop
+10.0.0.1
+PS C:\>
+```
+Remember that doing it this way always gives us the correct IP of the Default Gateway, regardless of how many network cards are present and configured. It’s called Default Route (0.0.0.0/0) or Last Gateway of Resort. If we can easily read the default gateway this way, then it must also work with remote computers. Assuming we do not know AzServers Default Gateway IP-Address, we can get it straightforward with Invoke-Command and Get-NetRoute.
+```
+PS C:\> Invoke-Command -ComputerName AzServer01 -ScriptBlock {Get-NetRoute -DestinationPrefix 0.0.0.
+0/0 | Select-Object -ExpandProperty NextHop}
+10.0.0.1
+```
+
+
+
+
 
 
