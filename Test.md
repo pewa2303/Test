@@ -176,18 +176,17 @@ Is ping a reliable way to check if a host is up? Opinions differ.
 
 The decisive factor for testing IP connectivity in Windows networks is the host based Windows Firewall. If both computers are on the same subnet, the ping may fail, but the host may be up. That’s because Windows Firewall may block ICMP requests. So far so good. But how can we determine if a host is up or not? I have a tailored solution for this problem, we simply check the ARP cache. If the ping fails, but the ARP request was successful, then it is pretty sure that the host is up! Note, that this applies only to computers that are in the same subnet. With a  small function in PowerShell, we see that 10.0.0.4 is up, but curiously the ping failed.
 ```
+"
 $IPAddress=Read-Host "Enter IP Address"
 arp -d
 $ping=Test-Connection -ComputerName $IPAddress -Count 1 -Quiet
 $arp=[boolean](arp -a | Select-String "$IPAddress")
-If (!$ping -and $arp)
-{$line; Write-Host "ICMP: failure" -ForegroundColor Red`n; Write-Host "ARP : successful" `
--ForegroundColor Green`n; $line; Write-Host "Possible Cause on ${IPAddress}: Windows Firewall is blocking traffic"}
+If (!$ping -and $arp) {
+Write-Host "ICMP: failure, ARP: successful. Possible Cause on ${IPAddress}: Windows Firewall is blocking traffic"
+}
 
 Enter IP Address: 10.0.0.4
-ICMP: failure
-ARP : successful
-Possible Cause on 10.0.0.4: Windows Firewall is blocking traffic
+ICMP: failure, ARP: successful. Possible Cause on 10.0.0.4: Windows Firewall is blocking traffic
 
 PS C:\> 
 ```
