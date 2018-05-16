@@ -4,7 +4,7 @@ It is assumed the reader has an intermediate knowledge of PowerShell and Network
 
 The examples in this chapter require an Active Directory domain environment with at least one Windows Server 2016 domain controller and one Windows Server 2016 member server. No prerequisites for forest and domain mode. Make sure Windows remote management (WinRM) is enabled on all computers.
 
-## Introduction
+# Introduction
 
 The more I play with it, the more I like it: PowerShell and the networking Cmdlets. Everybody knows ping. Everyone knows arp. But only very few have dealt with advanced network tasks in PowerShell. I want to change that here and will give the reader many useful tips to demonstrate that the object-oriented PowerShell has a lot to offer when it comes to doing network tasks, monitoring, automation and troubleshooting. Why do I actually think it’s worth talking about PowerShell and Network Technology?
 
@@ -93,6 +93,80 @@ PS C:\>
 ```
 This overview of what I think are the most important network cmdlets is a foretaste of what else we have in mind in this chapter.
 
+# Discovering the network with PowerShell
 
+Ping is without a doubt the number one network monitoring and troubleshooting tool, it's well known, it's fast and we can use it on almost all operating systems. It sends ICMP Echo Requests to test the connectivity to other hosts. There are now two more ascending stars that came with Windows PowerShell. One of them is called Test-Connection, the other Test-NetConnection. The main question for this part is how to gather information which Windows Server is up and running, which ports are open on your Servers and how to create a network IP overview of all Windows Servers. But first, let’s talk a little about the Cmdlets we need.
+
+## Test-Connection
+
+When I published my website article "The new version of ping: Test-Connection" I was really surprised how many in the IT-Pro community hadn't heard of this Cmdlet. Test-Connection uses the win32_ping status WMI object. Compared to ping Test-Connection returns more information. In addition to the source object, we can also collect information about the IPv6 Address. In my case it's an IPv6 Global Unicast Address, which is similar to an IPv4 Public Address. A nice view: All leading zeros in the IPv6 Address are automatically omitted.
+```
+PS C:\> ping AzServer01
+
+Pinging azserver01.sid-500.com [10.0.0.4] with 32 bytes of data:
+Reply from 10.0.0.4: bytes=32 time=1ms TTL=128
+Reply from 10.0.0.4: bytes=32 time=1ms TTL=128
+Reply from 10.0.0.4: bytes=32 time=1ms TTL=128
+Reply from 10.0.0.4: bytes=32 time=1ms TTL=128
+
+Ping statistics for 10.0.0.4:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 1ms, Maximum = 1ms, Average = 1ms
+PS C:\>
+PS C:\> Test-Connection AzServer01 | Format-Table -AutoSize
+
+Source Destination IPV4Address IPV6Address  Bytes Time(ms)
+------ ----------- ----------- -----------  ----- --------
+AzDC01 AzServer01  10.0.0.4    2001:aefb::3 32    1
+AzDC01 AzServer01  10.0.0.4    2001:aefb::3 32    0
+AzDC01 AzServer01  10.0.0.4    2001:aefb::3 32    0
+AzDC01 AzServer01  10.0.0.4    2001:aefb::3 32    1
+
+PS C:\>
+```
+What I like best is the silent mode, which I like to call Shut-Up-Mode.
+```
+PS C:\> Test-Connection AzServer01 -Quiet
+True
+PS C:\>
+```
+Test-Connection supports sending ICMP Echo Requests to multiple destinations at once and specifying the number of requests.
+```
+PS C:\> Test-Connection AzServer01,AzDc01 -Count 1 | Format-Table -AutoSize
+
+Source Destination IPV4Address IPV6Address                 Bytes Time(ms)
+------ ----------- ----------- -----------                 ----- --------
+AzDC01 AzServer01  10.0.0.4    2001:aefb::3                32    0
+AzDC01 AzDc01      10.0.0.7    fe80::a456:9139:9b95:df7e%4 32    0
+
+PS C:\>
+```
+With the good old ping command the source is always localhost. But the good news is: With Test-Connection you can specify a source computer. Note that I'm logged on AzDC01 and I want to perform a ping from computer AzServer01.
+```
+PS C:\> Test-Connection -Source AzDc02 -Destination AzServer01 | Format-Table -AutoSize
+
+Source Destination IPV4Address IPV6Address  Bytes Time(ms)
+------ ----------- ----------- -----------  ----- --------
+AzDC02 AzServer01  10.0.0.4    2001:aefb::3 32    1
+AzDC02 AzServer01  10.0.0.4    2001:aefb::3 32    0
+AzDC02 AzServer01  10.0.0.4    2001:aefb::3 32    0
+AzDC02 AzServer01  10.0.0.4    2001:aefb::3 32    1
+
+PS C:\>
+```
+If it is possible for one source computer, then it must also work for several. As an example, we could try to test the ICMP connectivity of all domain joined Windows Servers.
+```
+PS C:\> Test-Connection -ComputerName ((Get-ADComputer -Filter 'operatingsystem -like "*server*"').N
+ame) -Count 1 | Format-Table -AutoSize
+
+Source Destination IPV4Address IPV6Address                 Bytes Time(ms)
+------ ----------- ----------- -----------                 ----- --------
+AzDC01 AzDC01      10.0.0.7    fe80::a456:9139:9b95:df7e%4 32    0
+AzDC01 AzServer01  10.0.0.4    2001:aefb::3                32    0
+AzDC01 AzDC02      10.0.0.8                                32    0
+
+PS C:\>
+```
 
 
