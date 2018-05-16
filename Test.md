@@ -23,4 +23,36 @@ To configure an IPv4 Address you may want to check the Network Adapter Name or t
 ```
 PS C:\> Get-NetAdapter | Where-Object Status -EQ 'Up' | Format-Table -AutoSize
 ```
+Now we know which network cards are up and we can move on with New-NetIPAddress to configure the network settings. Make sure to provide the Subnet Mask in Prefix Notation.
+```
+PS C:\> New-NetIPAddress -InterfaceIndex 4 -IPAddress 10.0.0.7 -PrefixLength 24 -DefaultGateway 10.0.0.1
+```
+Our next step is configuring the DNS Server and the alternate DNS Server.
+```
+PS C:\> Set-DnsClientServerAddress -InterfaceIndex 4 -ServerAddresses 127.0.0.1,10.0.0.8
+```
+To check the settings run Get-NetIPConfiguration.
+{line-numbers=off}
+```
+PS C:\> Get-NetIPConfiguration
+
+
+InterfaceAlias       : Ethernet 2
+InterfaceIndex       : 4
+InterfaceDescription : Microsoft Hyper-V Network Adapter #2
+NetProfile.Name      : sid-500.com
+IPv6Address          : 2001:aefb::1
+IPv4Address          : 10.0.0.7
+IPv6DefaultGateway   :
+IPv4DefaultGateway   : 10.0.0.1
+DNSServer            : ::1
+                       127.0.0.1
+                       10.0.0.8
+
+
+
+PS C:\>
+```
+
+
 
