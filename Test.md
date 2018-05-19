@@ -411,7 +411,7 @@ foreach ($item in $dcs) {
 ```
 If one of the Domain Controller fails, I get a message with detailed information about this Domain Controller. It looks like this:
 
-Image
+![alt text](https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Logo Title Text 1")
 
 Great! Who would have believed that it is possible to implement a monitoring system in 10 minutes.
 
