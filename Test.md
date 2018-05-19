@@ -23,7 +23,7 @@ To configure an IPv4 Address you may want to check the Network Adapter Name or t
 ```
 PS C:\> Get-NetAdapter | Where-Object Status -EQ 'Up' | Format-Table -AutoSize
 ```
-Now we know which network cards are up and we can move on with New-NetIPAddress to configure the network settings. Make sure to provide the Subnet Mask in Prefix Notation.
+Now we know which network cards are up and we can move on with New-NetIPAddress to configure the network settings. Make sure to provide the Subnet Mask in **Prefix Notation**.
 ```
 PS C:\> New-NetIPAddress -InterfaceIndex 4 -IPAddress 10.0.0.7 -PrefixLength 24 -DefaultGateway 10.0.0.1
 ```
@@ -31,7 +31,7 @@ Our next step is configuring the DNS Server and the alternate DNS Server.
 ```
 PS C:\> Set-DnsClientServerAddress -InterfaceIndex 4 -ServerAddresses 127.0.0.1,10.0.0.8
 ```
-To check the settings run Get-NetIPConfiguration.
+To check all settings run Get-NetIPConfiguration.
 {line-numbers=off}
 ```
 PS C:\> Get-NetIPConfiguration
@@ -50,7 +50,7 @@ DNSServer            : ::1
 
 PS C:\>
 ```
-For the final test of the connectivity I like to use Test-NetConnection. Test-NetConnection without specifying a destination address attempts to reach a standard address on the Internet. I can see that I can not only reach hosts in the local network, but also hosts outside my subnet, which means that my default gateway must be configured correctly.
+For the final connectivity test I like to use Test-NetConnection. Test-NetConnection without specifying a destination address attempts to reach a standard address on the Internet. I can see that I can not only reach hosts in the local network, but also hosts outside my subnet, which means that my default gateway must be configured correctly.
 {line-numbers=off}
 ```
 PS C:\> Test-NetConnection
@@ -70,7 +70,7 @@ PS C:\> Get-NetRoute -DestinationPrefix 0.0.0.0/0 | Select-Object -ExpandPropert
 10.0.0.1
 PS C:\>
 ```
-Remember that doing it this way always gives us the correct IP of the Default Gateway, regardless of how many network cards are present and configured. It’s called Default Route (0.0.0.0/0) or Last Gateway of Resort. If we can easily read the default gateway this way, then it must also work with remote computers. Assuming we do not know AzServers Default Gateway IP-Address, we can get it straightforward with Invoke-Command and Get-NetRoute.
+Remember that gettting the IP Address of the Default Gateway with the ***prefix 0.0.0.0/0 always gives us the correct IP of the Default Gateway***, regardless of how many network cards are present and configured. It’s called Default Route (0.0.0.0/0) or Last Gateway of Resort. If we can easily read the default gateway this way, then it must also work with remote computers. Assuming we do not know AzServers Default Gateway IP-Address, we can get it straightforward with Invoke-Command and Get-NetRoute.
 ```
 PS C:\> Invoke-Command -ComputerName AzServer01 -ScriptBlock {Get-NetRoute -DestinationPrefix 0.0.0.
 0/0 | Select-Object -ExpandProperty NextHop}
@@ -144,7 +144,7 @@ AzDC01 AzDc01      10.0.0.7    fe80::a456:9139:9b95:df7e%4 32    0
 
 PS C:\>
 ```
-With the good old ping command the source is always localhost. But the good news is: With Test-Connection you can specify a source computer. Note that I'm logged on AzDC01 and I want to perform a ping from computer AzServer01.
+With the good old ping command the source is always localhost. But the good news is: With Test-Connection you can specify a ***source computer***. Note that I'm logged on AzDC01 and want to perform a ping from computer AzServer01.
 ```
 PS C:\> Test-Connection -Source AzDc02 -Destination AzServer01 | Format-Table -AutoSize
 
@@ -176,7 +176,7 @@ We owe all this and more to the object-orientated Powershell. I like it! As show
 
 Is ping a reliable way to check if a host is up? Opinions differ. 
 
-The decisive factor for testing IP connectivity in Windows networks is the host based Windows Firewall. If both computers are on the same subnet, the ping may fail, but the host may be up. That’s because Windows Firewall may block ICMP requests. So far so good. But how can we determine if a host is up or not? I have a tailored solution for this problem, we simply check the ARP cache. If the ping fails, but the ARP request was successful, then it is pretty sure that the host is up! Note, that this applies only to computers that are in the same subnet. With a  small function in PowerShell, we see that 10.0.0.4 is up, but curiously the ping failed.
+The decisive factor for testing IP connectivity in Windows networks is the host based ***Windows Firewall***. If both computers are on the same subnet, the ping may fail, but the host may be up. That’s because Windows Firewall may block ICMP requests. So far so good. But how can we determine if a host is up or not? I have a tailored solution for this problem, we simply check the ARP cache. If the ping fails, but the ARP request was successful, then it is pretty sure that the host is up! Note, that this applies only to computers that are in the same subnet. With a  small function in PowerShell, we see that 10.0.0.4 is up, but curiously the ping failed.
 ```
 "
 $IPAddress=Read-Host "Enter IP Address"
@@ -233,7 +233,6 @@ Async message sent to session RDP-Tcp#2
 PS C:\> 
      
 ```
-IMAGE ??????
 
 What have we done so far? We checked if the computer responds to ICMP requests. If so, we use quser to query the logged on users. If not, the script throws an error. As mentioned, we retrieve the computer names from the Active Directory database. Sometimes, however, there is a need to get more information than the computer name. Then we may need a complete network ip overview of all Windows Servers. Let’s do it.
 
@@ -392,7 +391,7 @@ Unfortunately there are still many environments that do without monitoring their
 
 ## Monitoring the Availability of Domain Controllers
 
-I always assume that all Active Directory Domain Controllers are up and running. This is not always the case with Windows client computers. Based on this fact, we can use ping to monitor all these DCs. The Try Catch Block catches all unreachable servers and sends an e-mail message with all important information about these servers. Note, that you have to adapt the Send-MailMessage line to your requirements. You can modify the catch block as you like, for example you could write all unavailable DC to a log file or send it as a message as shown in the example above.
+I always assume that all Active Directory Domain Controllers are up and running. This is not always the case with Windows client computers. Based on this fact, we can use ping to monitor all these DCs. The ***Try Catch Block*** catches all unreachable servers and sends an e-mail message with all important information about these servers. Note, that you have to adapt the Send-MailMessage line to your requirements. You can modify the catch block as you like, for example you could write all unavailable DC to a log file or send it as a message as shown in the example above.
 ```
 $dcs=(Get-ADDomainController -Filter *).Name
 foreach ($item in $dcs) {
@@ -411,15 +410,15 @@ foreach ($item in $dcs) {
 ```
 If one of the Domain Controller fails, I get a message with detailed information about this Domain Controller. It looks like this:
 
-![alt text](https://github.com/pewa2303/Test/blob/master/mail.PNG "Figure 1.1")
+Image
 
 Great! Who would have believed that it is possible to implement a monitoring system in 10 minutes.
 
 ## Monitoring Windows Firewall
 
-The Windows Firewall was first introduced with Windows XP SP2. That was a very long time ago. Unfortunately, in my experience, the host based Windows Firewall is still disabled on many systems. This is partly because administrators have not really dealt with this security feature yet, or because they have simply been deactivated it to see if it is their fault that something is not working. Neither reason is a good one. Meanwhile most attacks come from an attacker sitting inside the company network. The company-wide application firewall cannot help to prevent attacks here. Therefore it is important that the Windows Firewall is activated on all Windows systems. If you are a Windows Server administrator, make sure your systems are well protected, including that Windows Firewall is enabled on all servers, in short keep an eye on it.
+The Windows Firewall was first introduced with Windows XP SP2. That was a very long time ago. Unfortunately, in my experience, the host based Windows Firewall is still disabled on many systems. This is partly because administrators have not really dealt with this security feature yet, or because they have simply been deactivated it to see if it is their fault that something is not working. Neither reason is a good one. Meanwhile most attacks come from an ***attacker sitting inside the company network***. The company-wide application firewall cannot help to prevent attacks here. Therefore it is important that the Windows Firewall is activated on all Windows systems. If you are a Windows Server administrator, make sure your systems are well protected, including that Windows Firewall is enabled on all servers, in short keep an eye on it.
 
-Get-NetFirewallProfile is your friend when it comes to show firewall settings. To check if Windows Firewall is on for the Domain Profile run
+***Get-NetFirewallProfile*** is your friend when it comes to show your firewall settings. To check if Windows Firewall is on for the Domain Profile run
 ```
 PS C:\> Get-NetFirewallProfile -Profile Domain | Select-Object -ExpandProperty Enabled
 True
@@ -453,7 +452,7 @@ AzDC01     False
 AzServer01 True           
 AzDC02     True  
 ```   
-Surely, this can't tell you which firewall rules are enabled and allowed, but even that can be found out remotely. For example, if we want to find out if AzDC01 allows inbound https traffic, we can easily do so with Get-NetFirewallRule. Note that you have to provide the computername in the CIMSession parameter. There's no computername parameter.
+Surely, this can't tell you which firewall rules are enabled and allowed, but even that can be found out remotely. For example, if we want to find out if AzDC01 allows inbound https traffic, we can easily do so with Get-NetFirewallRule. Note that you have to provide the computername in the ***CIMSession*** parameter. 
 ```
 PS C:\> Get-NetFirewallRule -CimSession AzServer01 -DisplayName "World Wide Web Services (HTTPS Traf
 fic-In)" | Select-Object DisplayName,Enabled,Inbound,Action
