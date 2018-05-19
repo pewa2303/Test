@@ -70,7 +70,7 @@ PS C:\> Get-NetRoute -DestinationPrefix 0.0.0.0/0 | Select-Object -ExpandPropert
 10.0.0.1
 PS C:\>
 ```
-Remember that gettting the IP Address of the Default Gateway with the ***prefix 0.0.0.0/0 always gives us the correct IP of the Default Gateway***, regardless of how many network cards are present and configured. It’s called Default Route (0.0.0.0/0) or Last Gateway of Resort. If we can easily read the default gateway this way, then it must also work with remote computers. Assuming we do not know AzServers Default Gateway IP-Address, we can get it straightforward with Invoke-Command and Get-NetRoute.
+Remember that gettting the IP Address of the Default Gateway with the **prefix 0.0.0.0/0 always gives us the correct IP of the Default Gateway**, regardless of how many network cards are present and configured. It’s called Default Route (0.0.0.0/0) or Last Gateway of Resort. If we can easily read the default gateway this way, then it must also work with remote computers. Assuming we do not know AzServers Default Gateway IP-Address, we can get it straightforward with Invoke-Command and Get-NetRoute.
 ```
 PS C:\> Invoke-Command -ComputerName AzServer01 -ScriptBlock {Get-NetRoute -DestinationPrefix 0.0.0.
 0/0 | Select-Object -ExpandProperty NextHop}
@@ -144,7 +144,7 @@ AzDC01 AzDc01      10.0.0.7    fe80::a456:9139:9b95:df7e%4 32    0
 
 PS C:\>
 ```
-With the good old ping command the source is always localhost. But the good news is: With Test-Connection you can specify a ***source computer***. Note that I'm logged on AzDC01 and want to perform a ping from computer AzServer01.
+With the good old ping command the source is always localhost. But the good news is: With Test-Connection you can specify a **source computer**. Note that I'm logged on AzDC01 and want to perform a ping from computer AzServer01.
 ```
 PS C:\> Test-Connection -Source AzDc02 -Destination AzServer01 | Format-Table -AutoSize
 
@@ -176,7 +176,7 @@ We owe all this and more to the object-orientated Powershell. I like it! As show
 
 Is ping a reliable way to check if a host is up? Opinions differ. 
 
-The decisive factor for testing IP connectivity in Windows networks is the host based ***Windows Firewall***. If both computers are on the same subnet, the ping may fail, but the host may be up. That’s because Windows Firewall may block ICMP requests. So far so good. But how can we determine if a host is up or not? I have a tailored solution for this problem, we simply check the ARP cache. If the ping fails, but the ARP request was successful, then it is pretty sure that the host is up! Note, that this applies only to computers that are in the same subnet. With a  small function in PowerShell, we see that 10.0.0.4 is up, but curiously the ping failed.
+The decisive factor for testing IP connectivity in Windows networks is the host based **Windows Firewall**. If both computers are on the same subnet, the ping may fail, but the host may be up. That’s because Windows Firewall may block ICMP requests. So far so good. But how can we determine if a host is up or not? I have a tailored solution for this problem, we simply check the ARP cache. If the ping fails, but the ARP request was successful, then it is pretty sure that the host is up! Note, that this applies only to computers that are in the same subnet. With a  small function in PowerShell, we see that 10.0.0.4 is up, but curiously the ping failed.
 ```
 "
 $IPAddress=Read-Host "Enter IP Address"
@@ -391,7 +391,7 @@ Unfortunately there are still many environments that do without monitoring their
 
 ## Monitoring the Availability of Domain Controllers
 
-I always assume that all Active Directory Domain Controllers are up and running. This is not always the case with Windows client computers. Based on this fact, we can use ping to monitor all these DCs. The ***Try Catch Block*** catches all unreachable servers and sends an e-mail message with all important information about these servers. Note, that you have to adapt the Send-MailMessage line to your requirements. You can modify the catch block as you like, for example you could write all unavailable DC to a log file or send it as a message as shown in the example above.
+I always assume that all Active Directory Domain Controllers are up and running. This is not always the case with Windows client computers. Based on this fact, we can use ping to monitor all these DCs. The **Try Catch Block** catches all unreachable servers and sends an e-mail message with all important information about these servers. Note, that you have to adapt the Send-MailMessage line to your requirements. You can modify the catch block as you like, for example you could write all unavailable DC to a log file or send it as a message as shown in the example above.
 ```
 $dcs=(Get-ADDomainController -Filter *).Name
 foreach ($item in $dcs) {
