@@ -72,15 +72,14 @@ PS C:\>
 ```
 Remember that gettting the IP Address of the Default Gateway with the **prefix 0.0.0.0/0 always gives us the correct IP of the Default Gateway**, regardless of how many network cards are present and configured. It’s called Default Route (0.0.0.0/0) or Last Gateway of Resort. If we can easily read the default gateway this way, then it must also work with remote computers. Assuming we do not know AzServers Default Gateway IP-Address, we can get it straightforward with Invoke-Command and Get-NetRoute.
 ```
-PS C:\> Invoke-Command -ComputerName AzServer01 -ScriptBlock {Get-NetRoute -DestinationPrefix 0.0.0.
-0/0 | Select-Object -ExpandProperty NextHop}
+PS C:\> Invoke-Command -ComputerName AzServer01 -ScriptBlock {Get-NetRoute -DestinationPrefix 0.0.0.0/0 | 
+Select-Object -ExpandProperty NextHop}
 10.0.0.1
 ```
 Now we go one better! We can test if a remote computer Server02 has connectivity to its Default Gateway without knowing the IP Address of that Gateway.
 ```
-PS C:\> Test-Connection -Source Server02 -ComputerName (Invoke-Command -Computer
-Name Server02 -ScriptBlock {Get-NetRoute -DestinationPrefix '0.0.0.0/0' | Select
--Object -ExpandProperty NextHop})
+PS C:\> Test-Connection -Source Server02 -ComputerName (Invoke-Command -ComputerName Server02 -ScriptBlock {Get-NetRoute -DestinationPrefix '0.0.0.0/0' | 
+Select-Object -ExpandProperty NextHop})
 
 Source        Destination     IPV4Address      IPV6Address
 ------        -----------     -----------      -----------
@@ -159,8 +158,8 @@ PS C:\>
 ```
 If it is possible for one source computer, then it must also work for several. As an example, we could try to test the ICMP connectivity of all domain joined Windows Servers.
 ```
-PS C:\> Test-Connection -ComputerName ((Get-ADComputer -Filter 'operatingsystem -like "*server*"').N
-ame) -Count 1 | Format-Table -AutoSize
+PS C:\> Test-Connection -ComputerName ((Get-ADComputer -Filter 'operatingsystem -like "*server*"').Name) -Count 1 | 
+Format-Table -AutoSize
 
 Source Destination IPV4Address IPV6Address                 Bytes Time(ms)
 ------ ----------- ----------- -----------                 ----- --------
@@ -404,7 +403,8 @@ foreach ($item in $dcs) {
  $Site=(Get-ADDomainController $item).Site
  $IP= (Get-ADDomainController $item).IPv4Address
  $date=Get-Date
- Send-MailMessage -From Alert@domain.com -To p.gruenauer@domain.com -SmtpServer EX01 -Subject "Site: $Site | $item is down" -Body "$IP could not be reached at $date.`n`nIf you receive this message again in 15 minutes, $item is probably down."
+ Send-MailMessage -From Alert@domain.com -To p.gruenauer@domain.com -SmtpServer EX01 -Subject "Site: $Site | 
+ $item is down" -Body "$IP could not be reached at $date.`n`nIf you receive this message again in 15 minutes, $item is probably down."
 }
 }
 ```
@@ -431,7 +431,8 @@ $servers=(Get-ADComputer -Filter * -Properties Operatingsystem | Where-Object {$
 
 foreach ($s in $servers) {
 
-        $check=Invoke-Command -ComputerName $s -ScriptBlock {Get-NetFirewallProfile -Profile Domain | Select-Object -ExpandProperty Enabled} -ErrorAction SilentlyContinue
+        $check=Invoke-Command -ComputerName $s -ScriptBlock {Get-NetFirewallProfile -Profile Domain | 
+        Select-Object -ExpandProperty Enabled} -ErrorAction SilentlyContinue
 
         $fresult+=New-Object -TypeName PSCustomObject -Property ([ordered]@{
 
@@ -454,8 +455,8 @@ AzDC02     True
 ```   
 Surely, this can't tell you which firewall rules are enabled and allowed, but even that can be found out remotely. For example, if we want to find out if AzDC01 allows inbound https traffic, we can easily do so with Get-NetFirewallRule. Note that you have to provide the computername in the ***CIMSession*** parameter. 
 ```
-PS C:\> Get-NetFirewallRule -CimSession AzServer01 -DisplayName "World Wide Web Services (HTTPS Traf
-fic-In)" | Select-Object DisplayName,Enabled,Inbound,Action
+PS C:\> Get-NetFirewallRule -CimSession AzServer01 -DisplayName "World Wide Web Services (HTTPS Traffic-In)" | 
+Select-Object DisplayName,Enabled,Inbound,Action
 
 DisplayName                                Enabled Inbound Action
 -----------                                ------- ------- ------
@@ -466,7 +467,7 @@ PS C:\>
 
 # Conclusion
 
-Whether monitoring the network, troubleshooting, obtaining IP settings, the possibilities seem to be endless. For all those who have never worked with the network Cmdlets before, I hope to have prepared a good introduction to the topic. I also hope that for those who are not new to the subject, I have brought something new and sparked some ideas how to get more out of PowerShell and Networking. In that sense, I hope you enjoyed it and have fun with the next chapter!
+Whether monitoring the network, troubleshooting, obtaining IP settings, the possibilities seem to be endless. For all those who have never worked with the network Cmdlets before and not have created some scripts out of them I hope to have prepared a good introduction to the topic. I also hope that for those who are not new to the subject, I have brought something new and sparked some ideas how to get more out of PowerShell and Networking. My main concern was to give food for thought. But also some ready-made scripts were included. In that sense, I hope you enjoyed it and have fun with the next chapter!
 
 
 
