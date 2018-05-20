@@ -115,7 +115,7 @@ Ping statistics for 10.0.0.4:
 Approximate round trip times in milli-seconds:
     Minimum = 1ms, Maximum = 1ms, Average = 1ms
 PS C:\>
-PS C:\> Test-Connection AzServer01 | Format-Table -AutoSize
+PS C:\> Test-Connection -Destination AzServer01 | Format-Table -AutoSize
 
 Source Destination IPV4Address IPV6Address  Bytes Time(ms)
 ------ ----------- ----------- -----------  ----- --------
@@ -128,13 +128,13 @@ PS C:\>
 ```
 What I like best is the silent mode, which I like to call Shut-Up-Mode.
 ```
-PS C:\> Test-Connection AzServer01 -Quiet
+PS C:\> Test-Connection -Destination AzServer01 -Quiet
 True
 PS C:\>
 ```
 Test-Connection supports sending ICMP Echo Requests to multiple destinations at once and specifying the number of requests.
 ```
-PS C:\> Test-Connection AzServer01,AzDc01 -Count 1 | Format-Table -AutoSize
+PS C:\> Test-Connection -Destination AzServer01,AzDc01 -Count 1 | Format-Table -AutoSize
 
 Source Destination IPV4Address IPV6Address                 Bytes Time(ms)
 ------ ----------- ----------- -----------                 ----- --------
@@ -173,12 +173,12 @@ We owe all this and more to the object-orientated Powershell. I like it! As show
 
 ## Is this host up and who is logged in?
 
-Is ping a reliable way to check if a host is up? Opinions differ. 
+Is ping a reliable way to check if a host is up? Opinions differ. But it's definitely a good lead.
 
 The decisive factor for testing IP connectivity in Windows networks is the host based **Windows Firewall**. If both computers are on the same subnet, the ping may fail, but the host may be up. That’s because Windows Firewall may block ICMP requests. So far so good. But how can we determine if a host is up or not? I have a tailored solution for this problem, we simply check the ARP cache. If the ping fails, but the ARP request was successful, then it is pretty sure that the host is up! Note, that this applies only to computers that are in the same subnet. With a  small function in PowerShell, we see that 10.0.0.4 is up, but curiously the ping failed.
 ```
 "
-$IPAddress=Read-Host "Enter IP Address"
+$IPAddress=Read-Host -Prompt "Enter IP Address"
 arp -d
 $ping=Test-Connection -ComputerName $IPAddress -Count 1 -Quiet
 $arp=[boolean](arp -a | Select-String "$IPAddress")
@@ -194,11 +194,11 @@ PS C:\>
 This means, we could use Test-Connection to check multiple computers if they’re up before doing any further actions on them. 
 With that on mind, I wrote a nice little script which first tests with Test-Connection if the remote computer is up, then shows the logged on users (disconnected users are not displayed) and then sends a message to these users session over the network.
 ```
-$cname=Read-Host "Enter Computername"
-$test=Test-Connection $cname -Count 1 -ErrorAction SilentlyContinue
+$cname=Read-Host -Prompt "Enter Computername"
+$test=Test-Connection -Destination $cname -Count 1 -ErrorAction SilentlyContinue
 $result=@()
 If ($test) {
-       $message=Read-Host 'Enter message'
+       $message=Read-Host -Prompt 'Enter message'
        Invoke-Command -ComputerName $cname -ScriptBlock {quser} | Select-Object -Skip 1 | Foreach-Object {
        $b=$_.trim() -replace '\s+',' ' -replace '>','' -split '\s'
        $result+= New-Object -TypeName PSObject -Property ([ordered]@{
@@ -213,7 +213,7 @@ If ($test) {
         Invoke-Command -ComputerName $cname -ScriptBlock {msg * /V $using:message} -ErrorAction SilentlyContinue
            }
 else {
-        Write-Host "Failed to connect to $cname" -ForegroundColor Red
+        Write-Host "Failed to connect to $cname"
         throw 'Error'
      }
      
@@ -240,7 +240,7 @@ What have we done so far? We checked if the computer responds to ICMP requests. 
 With all this information like reading the gateway and the IP configuration, it is easy to get a complete IP overview of all Windows Server systems. The most important values are retrieved, such as IP address, gateway, DNS server and more.
 ```
 $getc=(Get-ADComputer -Filter 'operatingsystem -like "*server*"').Name
-$test=Test-Connection $getc -Count 1 -ErrorAction SilentlyContinue
+$test=Test-Connection -Destination $getc -Count 1 -ErrorAction SilentlyContinue
 $reach=$test | Select-Object -ExpandProperty Address
 $result=@()
 
@@ -251,7 +251,7 @@ foreach ($c in $reach)
 
 $i=Invoke-Command -ComputerName $c -ScriptBlock {
         
-            Get-NetIPConfiguration | Select-Object InterfaceAlias,InterfaceIndex,Ipv4Address,Ipv6Address,DNSServer
+            Get-NetIPConfiguration | Select-Object -Property InterfaceAlias,InterfaceIndex,Ipv4Address,Ipv6Address,DNSServer
             Get-NetRoute -DestinationPrefix '0.0.0.0/0' | Select-Object -ExpandProperty NextHop}
 
             $result +=New-Object -TypeName PSCustomObject -Property ([ordered]@{
@@ -288,7 +288,7 @@ AzDC02     Ethernet 3             5     10.0.0.8                        ::1     
 
 PS C:\> 
 ```
-Of course, this is not only possible for Windows servers, but also for domain controllers or Windows clients. But here you have to consider if this makes sense, because Windows clients are usually not always switched on. Remember that the function initiates a live query over all given systems. 
+Of course, this is not only possible for Windows servers, but also for domain controllers or Windows clients. But here you have to consider if this makes sense, because Windows clients are usually not always switched on. Remember that the function initiates a live query over all given systems. If one of the computer is switched off, you will not catch all systems.
 
 ## Port Scanning
 
@@ -380,7 +380,7 @@ microsoft.com 23.100.122.175   88  False
 
 PS C:\>
 ```
-Back to nmap and PowerShell. I try to avoid 3rd party tools wherever possible. Why? These tools are only available if they are installed on the system. The problem is that I might have these tools available on other systems and therefore have to work with onboard resources, even if the software is available, who says I can install it? Certainly, also my function shown here is not on board by default. But a mini port scanner called Test Connection.
+Back to nmap and PowerShell. I try to avoid 3rd party tools wherever possible. Why? These tools are only available if they are installed on the system. The problem is that I might not have these tools available on other systems and therefore have to work with onboard resources, even if the software is available, who says I can install it? Certainly, also my function shown here is not on board by default. But a mini port scanner called Test Connection.
 
  This is a wonderful transition to monitoring with onboard resources.
 
@@ -445,7 +445,7 @@ foreach ($s in $servers) {
 
 Write-Output $fresult
 ```
-This gives us an overview of which servers have activated or deactivated the firewall.
+This gives you an overview of which servers have activated or deactivated the firewall.
 ```
 Server     FirewallEnabled
 ------     ---------------
@@ -456,7 +456,7 @@ AzDC02     True
 Surely, this can't tell you which firewall rules are enabled and allowed, but even that can be found out remotely. For example, if we want to find out if AzDC01 allows inbound https traffic, we can easily do so with Get-NetFirewallRule. Note that you have to provide the computername in the ***CIMSession*** parameter. 
 ```
 PS C:\> Get-NetFirewallRule -CimSession AzServer01 -DisplayName "World Wide Web Services (HTTPS Traffic-In)" | 
-Select-Object DisplayName,Enabled,Inbound,Action
+Select-Object -Property DisplayName,Enabled,Inbound,Action
 
 DisplayName                                Enabled Inbound Action
 -----------                                ------- ------- ------
