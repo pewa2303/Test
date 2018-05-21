@@ -254,7 +254,8 @@ foreach ($c in $reach)
 {
 $i=Invoke-Command -ComputerName $c -ScriptBlock {
         
-            Get-NetIPConfiguration | Select-Object -Property InterfaceAlias,InterfaceIndex,Ipv4Address,Ipv6Address,DNSServer
+            Get-NetIPConfiguration | 
+            Select-Object -Property InterfaceAlias,InterfaceIndex,Ipv4Address,Ipv6Address,DNSServer
             Get-NetRoute -DestinationPrefix '0.0.0.0/0' | Select-Object -ExpandProperty NextHop}
 
             $result +=New-Object -TypeName PSCustomObject -Property ([ordered]@{
@@ -355,7 +356,7 @@ foreach ($i in $Target)
             
             {
         
-                $a=Test-NetConnection -ComputerName $i -Port $p -WarningAction SilentlyContinue                                        
+                $a=Test-NetConnection -ComputerName $i -Port $p -WarningAction SilentlyContinue                                      
                 $result+=New-Object -TypeName PSObject -Property ([ordered]@{
                                 'Target'=$a.ComputerName;
                                 'RemoteAddress'=$a.RemoteAddress;
@@ -406,7 +407,8 @@ foreach ($item in $dcs) {
  $IP= (Get-ADDomainController $item).IPv4Address
  $date=Get-Date
  Send-MailMessage -From Alert@domain.com -To p.gruenauer@domain.com -SmtpServer EX01 -Subject "Site: $Site | 
- $item is down" -Body "$IP could not be reached at $date.`n`nIf you receive this message again in 15 minutes, $item is probably down."
+ $item is down" -Body "$IP could not be reached at $date.`n`nIf you receive this message again in 15 minutes, $
+ item is probably down."
 }
 }
 ```
