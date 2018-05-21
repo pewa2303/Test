@@ -440,7 +440,8 @@ PS C:\>
 To get the current state of the Windows Firewall from all domain-joined Windows Servers enter the following code and hit enter.
 ```
 $fresult=@()
-$servers=(Get-ADComputer -Filter * -Properties Operatingsystem | Where-Object {$_.operatingsystem -like "*server*"}).Name
+$servers=(Get-ADComputer -Filter * -Properties Operatingsystem | 
+          Where-Object {$_.operatingsystem -like "*server*"}).Name
 
 foreach ($s in $servers) {
 
