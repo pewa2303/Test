@@ -357,7 +357,7 @@ foreach ($i in $Target)
             
             {
         
-                $a=Test-NetConnection -ComputerName $i -Port $p -WarningAction SilentlyContinue                                      
+                $a=Test-NetConnection -ComputerName $i -Port $p -WarningAction SilentlyContinue
                 $result+=New-Object -TypeName PSObject -Property ([ordered]@{
                                 'Target'=$a.ComputerName;
                                 'RemoteAddress'=$a.RemoteAddress;
