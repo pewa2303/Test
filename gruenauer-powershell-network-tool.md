@@ -82,7 +82,8 @@ Select-Object -ExpandProperty NextHop}
 ```
 Now we go one better! We can test if a remote computer Server02 has connectivity to its Default Gateway without knowing the IP Address of that Gateway, because the Default Gateways IP Address is always associated with the Default Route.
 ```
-PS C:\> Test-Connection -Source Server02 -ComputerName (Invoke-Command -ComputerName Server02 -ScriptBlock {Get-NetRoute -DestinationPrefix '0.0.0.0/0' | 
+PS C:\> Test-Connection -Source Server02
+-ComputerName (Invoke-Command -ComputerName Server02 -ScriptBlock {Get-NetRoute -DestinationPrefix '0.0.0.0/0' | 
 Select-Object -ExpandProperty NextHop})
 
 Source        Destination     IPV4Address      IPV6Address
@@ -218,7 +219,7 @@ else {
         Write-Host "Failed to connect to $cname"
         throw 'Error'
      }
-´´´
+```
 After running the code you'll be asked to provide a computer name. Then enter the message that is send to all logged on users.
 ```
 Enter Computername: AzServer01
