@@ -408,8 +408,8 @@ foreach ($item in $dcs) {
  $IP= (Get-ADDomainController $item).IPv4Address
  $date=Get-Date
  Send-MailMessage -From Alert@domain.com -To p.gruenauer@domain.com -SmtpServer EX01 -Subject "Site: $Site | 
- $item is down" -Body "$IP could not be reached at $date.`n`nIf you receive this message again in 15 minutes, $
- item is probably down."
+ $item is down" -Body "$IP could not be reached at $date.`n`nIf you receive this message again in 15 minutes, 
+ $item is probably down."
 }
 }
 ```
