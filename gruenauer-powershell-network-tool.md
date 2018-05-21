@@ -345,7 +345,8 @@ param
 (
     [Parameter(Position=0)]
     $Target='localhost', 
-    [Parameter(Mandatory=$true, Position=1, Helpmessage = 'Enter Port Numbers. Separate them by comma.')]
+    [Parameter(Mandatory=$true, Position=1, Helpmessage = 'Enter Port Numbers. 
+    Separate them by comma.')]
     $Port
 )
 
