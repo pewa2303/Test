@@ -217,7 +217,9 @@ $arp=[boolean](arp -a | Select-String "$IPAddress")
 If (!$ping -and $arp) {
 Write-Host "ICMP: failure, ARP: successful. Possible Cause on ${IPAddress}: Windows Firewall is blocking traffic"
 }
+```
 
+```powershell
 Enter IP Address: 10.0.0.4
 ICMP: failure, ARP: successful. Possible Cause on 10.0.0.4: Windows Firewall is blocking traffic
 
